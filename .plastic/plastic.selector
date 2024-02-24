@@ -1,0 +1,4 @@
+repository "HeadFootball3D@deagtom@cloud"
+  path "/"
+    br "/main"
+    co "/main"
