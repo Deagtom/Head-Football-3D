@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     private CharacterController _characterController;
     private Vector3 _position;
     private const float _Gravity = 0.1f;
+    public static bool IsPause = true;
 
     [Header("Camera")]
     [SerializeField] private float _sensitivityMouse = 5.0f;
@@ -33,7 +34,7 @@ public class PlayerController : MonoBehaviour
 
     private void PlayerMove()
     {
-        if (_characterController.isGrounded)
+        if (_characterController.isGrounded && !IsPause)
         {
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
@@ -53,7 +54,7 @@ public class PlayerController : MonoBehaviour
         _mouseRotationCurrentX = Mathf.SmoothDamp(_mouseRotationX, _mouseRotationCurrentX, ref _mouseCurrentVelosityX, _smoothTime);
         _mouseRotationCurrentY = Mathf.SmoothDamp(_mouseRotationY, _mouseRotationCurrentY, ref _mouseCurrentVelosityY, _smoothTime);
 
-        _characterController.transform.rotation = Quaternion.Euler(0.0f, _mouseRotationCurrentX, 0.0f);
-        _camera.transform.rotation = Quaternion.Euler(-_mouseRotationCurrentY, _mouseRotationCurrentX, 0.0f);
+        _characterController.transform.rotation = Quaternion.Euler(0.0f, _mouseRotationCurrentX - 90.0f, 0.0f);
+        _camera.transform.rotation = Quaternion.Euler(-_mouseRotationCurrentY, _mouseRotationCurrentX - 90.0f, 0.0f);
     }
 }

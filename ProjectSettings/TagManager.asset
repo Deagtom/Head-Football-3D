@@ -4,7 +4,12 @@
 TagManager:
   serializedVersion: 2
   tags:
+  - RightGates
+  - LeftGates
   - Gates
+  - Ball
+  - Trigger
+  - Object
   layers:
   - Default
   - TransparentFX
