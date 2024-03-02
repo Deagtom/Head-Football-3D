@@ -1,5 +1,5 @@
 using System;
-using Unity.VisualScripting;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,55 +10,65 @@ public class Ball : MonoBehaviour
     [SerializeField] private Text _scoreRight;
     private GameObject _ball;
     private bool _isMovingWithBall = false;
+    private string _whoIs;
+
+    [Header("Kick")]
+    [SerializeField] private Slider _kickForceSlider;
+    private float _kickForceValue = 5f;
 
     private void Start()
     {
         _scoreLeft = GameObject.Find("ScoreLeft").GetComponent<Text>();
         _scoreRight = GameObject.Find("ScoreRight").GetComponent<Text>();
+        _kickForceSlider = GameObject.Find("ForceKick").GetComponent<Slider>();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
+        _kickForceSlider.value = _kickForceValue;
         Kick();
     }
 
-    private void Re()
-    {
-        DestroyWithTag("Player");
-        DestroyWithTag("Object");
-        Destroy(GameObject.FindGameObjectWithTag("Ball"));
+    private void FixedUpdate() => PowerKickForce();
 
-        SpawnElements spawnElements = GameObject.FindGameObjectWithTag("Trigger").GetComponent<SpawnElements>();
-        spawnElements.SpawnNewPlayers();
-        spawnElements.SpawnNewBall();
-        spawnElements.SpawnNewObjects();
-        Countdown.Timer += 4;
-    }
-
-    private void DestroyWithTag(string destroyTag)
+    private void PowerKickForce()
     {
-        GameObject[] destroyObject;
-        destroyObject = GameObject.FindGameObjectsWithTag(destroyTag);
-        foreach (GameObject oneObject in destroyObject)
-            Destroy(oneObject);
+        if (_isMovingWithBall && (Input.GetMouseButton(0) || Input.GetMouseButton(1)) && _kickForceValue <= 35f)
+            _kickForceValue += 20f * Time.fixedDeltaTime;
     }
 
     private void Kick()
     {
-        if (Input.GetMouseButton(0) && _isMovingWithBall)
+        if (_isMovingWithBall)
         {
-            _ball.GetComponent<Rigidbody>().isKinematic = false;
-            _ball.transform.parent = null;
-            _ball.GetComponent<Rigidbody>().AddForce(transform.forward * 25f, ForceMode.Impulse);
-            _ball = null;
-            _isMovingWithBall = false;
+            if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
+            {
+                _ball.GetComponent<Rigidbody>().isKinematic = false;
+                _ball.transform.parent = null;
+                if (Input.GetMouseButtonUp(0))
+                {
+                    _ball.GetComponent<Rigidbody>().AddForce(transform.forward * _kickForceValue, ForceMode.Impulse);
+                    _ball.GetComponent<Rigidbody>().AddForce(transform.up * (_kickForceValue / 15f), ForceMode.Impulse);
+                }
+                else if (Input.GetMouseButtonUp(1))
+                {
+                    _ball.GetComponent<Rigidbody>().AddForce(transform.forward * (_kickForceValue / 1.5f), ForceMode.Impulse);
+                    _ball.GetComponent<Rigidbody>().AddForce(transform.up * (_kickForceValue / 4f), ForceMode.Impulse);
+                }
+                _ball = null;
+                _kickForceValue = 5;
+                _isMovingWithBall = false;
+                StartCoroutine(ClearPlayerName());
+            }
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player" && collision.gameObject.name != _whoIs)
         {
+            _whoIs = collision.gameObject.name;
+
             GetComponent<Rigidbody>().isKinematic = true;
             transform.parent = collision.transform.GetChild(1);
             transform.localPosition = Vector3.zero;
@@ -68,16 +78,24 @@ public class Ball : MonoBehaviour
         }
     }
 
+    private IEnumerator ClearPlayerName()
+    {
+        yield return new WaitForSeconds(1);
+        _whoIs = null;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "RightGates")
         {
-            Re();
+            Restart restart = GameObject.FindGameObjectWithTag("Trigger").GetComponent<Restart>();
+            restart.Re();
             _scoreLeft.text = Convert.ToString(int.Parse(_scoreLeft.text) + 1);
         }
         else if (other.gameObject.tag == "LeftGates")
         {
-            Re();
+            Restart restart = GameObject.FindGameObjectWithTag("Trigger").GetComponent<Restart>();
+            restart.Re();
             _scoreRight.text = Convert.ToString(int.Parse(_scoreRight.text) + 1);
         }
     }

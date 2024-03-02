@@ -14,13 +14,13 @@ public class SpawnElements : MonoBehaviour
 
     [Header("Spawn Points Objects")]
     [SerializeField] private Transform[] _objectsSpawnPoints;
-    [SerializeField] private GameObject _objectPrefab;
+    [SerializeField] private GameObject[] _objectPrefabs;
 
     private void Start()
     { 
         SpawnNewPlayers();
-        SpawnNewObjects();
         SpawnNewBall();
+        SpawnNewObjects();
     }
 
     public void SpawnNewPlayers()
@@ -31,8 +31,8 @@ public class SpawnElements : MonoBehaviour
 
     public void SpawnNewObjects()
     {
-        foreach (Transform t in _objectsSpawnPoints[Random.Range(0, 4)])
-            GameObject.Instantiate(_objectPrefab, t.position, Quaternion.identity);
+        foreach (Transform t in _objectsSpawnPoints[Random.Range(0, _objectsSpawnPoints.Length)])
+            GameObject.Instantiate(_objectPrefabs[Random.Range(0, _objectPrefabs.Length)], t.position, Quaternion.identity);
     }
 
     public void SpawnNewBall() => Instantiate(_ballPrefab, _ballSpawnPoint.position, Quaternion.identity);
